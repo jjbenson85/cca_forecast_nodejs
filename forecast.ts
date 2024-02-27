@@ -1,5 +1,6 @@
 import { parseISO, format } from "date-fns";
 import { WeatherData } from "./test/data";
+import { MaybeError, averageNumArray, isError } from "./helpers";
 
 type Summary = {
   morning_average_temperature: number | string;
@@ -9,7 +10,21 @@ type Summary = {
   high_temperature: number;
   low_temperature: number;
 };
-function summarizeForecast(data: WeatherData[]) {
+
+const getAverageTemperature = (items: number[]): number | string => {
+  const maybeValue = averageNumArray(items);
+  return isError(maybeValue)
+    ? "Insufficient forecast data"
+    : Math.round(maybeValue);
+};
+
+const getChanceOfRain = (items: number[]): number | string => {
+  const maybeValue = averageNumArray(items);
+  return isError(maybeValue)
+    ? "Insufficient forecast data"
+    : Number(maybeValue.toFixed(2));
+};
+export function summarizeForecast(data: WeatherData[]) {
   const grpDay: Record<string, WeatherData[]> = {};
 
   // Group entries by day
@@ -49,34 +64,10 @@ function summarizeForecast(data: WeatherData[]) {
     });
 
     const summary: Summary = {
-      // If no morning data, report insufficient data
-      morning_average_temperature:
-        tMorning.length === 0
-          ? "Insufficient forecast data"
-          : Math.round(tMorning.reduce((a, b) => a + b, 0) / tMorning.length),
-
-      morning_chance_of_rain:
-        rMorning.length === 0
-          ? "Insufficient forecast data"
-          : Number(
-              (rMorning.reduce((a, b) => a + b, 0) / rMorning.length).toFixed(2)
-            ),
-      // If no afternoon data, report insufficient data
-      afternoon_average_temperature:
-        tAfternoon.length === 0
-          ? "Insufficient forecast data"
-          : Math.round(
-              tAfternoon.reduce((a, b) => a + b, 0) / tAfternoon.length
-            ),
-
-      afternoon_chance_of_rain:
-        rAfternoon.length === 0
-          ? "Insufficient forecast data"
-          : Number(
-              (
-                rAfternoon.reduce((a, b) => a + b, 0) / rAfternoon.length
-              ).toFixed(2)
-            ),
+      morning_average_temperature: getAverageTemperature(tMorning),
+      morning_chance_of_rain: getChanceOfRain(rMorning),
+      afternoon_average_temperature: getAverageTemperature(tAfternoon),
+      afternoon_chance_of_rain: getChanceOfRain(rAfternoon),
       high_temperature: Math.max(...tAll),
       low_temperature: Math.min(...tAll),
     };
@@ -90,4 +81,3 @@ function summarizeForecast(data: WeatherData[]) {
   return summaries;
 }
 
-module.exports = summarizeForecast;
