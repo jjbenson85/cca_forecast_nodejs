@@ -8,6 +8,25 @@ import {
   sum,
   sumNumArray,
 } from "../helpers.js";
+import { WeatherData } from "./data.js";
+
+const testWeatherData: WeatherData[] = [
+  {
+    date_time: "2021-01-01T01:00:00Z",
+    average_temperature: 1,
+    probability_of_rain: 1,
+  },
+  {
+    date_time: "2021-01-01T02:00:00Z",
+    average_temperature: 2,
+    probability_of_rain: 2,
+  },
+  {
+    date_time: "2021-01-01T03:00:00Z",
+    average_temperature: 3,
+    probability_of_rain: 3,
+  },
+];
 
 describe("sum", function () {
   it("should sum the numbers", () => {
@@ -42,7 +61,7 @@ describe("isError", () => {
 
 describe("getAverageTemperature", () => {
   it("should return the average temperature", () => {
-    expect(getAverageTemperature([1, 2, 3])).toEqual(2);
+    expect(getAverageTemperature(testWeatherData)).toEqual(2);
   });
   it("should return an error if the array is empty", () => {
     expect(getAverageTemperature([])).toEqual("Insufficient forecast data");
@@ -51,7 +70,7 @@ describe("getAverageTemperature", () => {
 
 describe("getChangeOfRain", () => {
   it("should return the chance of rain", () => {
-    expect(getChanceOfRain([1, 2, 3])).toEqual(2);
+    expect(getChanceOfRain(testWeatherData)).toEqual(2);
   });
   it("should return an error if the array is empty", () => {
     expect(getChanceOfRain([])).toEqual("Insufficient forecast data");
@@ -65,13 +84,7 @@ describe("isBetweenHours", () => {
       throw isBetween;
     }
 
-    expect(
-      isBetween({
-        date_time: "2021-01-01T01:00:00Z",
-        average_temperature: 1,
-        probability_of_rain: 1,
-      }),
-    ).toEqual(true);
+    expect(isBetween(testWeatherData[0])).toEqual(true);
   });
 
   it("should return an error if start is greater than end", () => {

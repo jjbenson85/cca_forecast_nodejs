@@ -19,6 +19,24 @@ type Summary = {
 };
 
 export function summarizeForecast(data: WeatherData[]) {
+  const morningFilter = isBetweenHours(6, 12);
+  if (isError(morningFilter)) {
+    throw morningFilter;
+  }
+
+  const afternoonFilter = isBetweenHours(12, 18);
+  if (isError(afternoonFilter)) {
+    throw afternoonFilter;
+  }
+
+  const uniqueDates = [...new Set(data.map((e) => e.date_time.split("T")[0]))];
+
+  const d = uniqueDates.map((date) => {
+    const items = data.filter((e) => e.date_time.split("T")[0] === date);
+    const morningItems = items.filter(morningFilter);
+    const afternoonItems = items.filter(afternoonFilter);
+  });
+
   const grpDay: Record<string, WeatherData[]> = {};
 
   // Group entries by day
@@ -33,16 +51,6 @@ export function summarizeForecast(data: WeatherData[]) {
 
   const summaries: Record<string, Summary> = {};
 
-  const morningFilter = isBetweenHours(6, 12);
-  if (isError(morningFilter)) {
-    throw morningFilter;
-  }
-
-  const afternoonFilter = isBetweenHours(12, 18);
-  if (isError(afternoonFilter)) {
-    throw afternoonFilter;
-  }
-
   // Process each day
   Object.keys(grpDay).forEach((day) => {
     const items = grpDay[day];
@@ -50,25 +58,13 @@ export function summarizeForecast(data: WeatherData[]) {
     const morningItems = items.filter(morningFilter);
     const afternoonItems = items.filter(afternoonFilter);
 
-    const tMorning: number[] = morningItems.map(
-      (item) => item.average_temperature,
-    );
-    const rMorning: number[] = morningItems.map(
-      (item) => item.probability_of_rain,
-    );
-    const tAfternoon: number[] = afternoonItems.map(
-      (item) => item.average_temperature,
-    );
-    const rAfternoon: number[] = afternoonItems.map(
-      (item) => item.probability_of_rain,
-    );
     const tAll = items.map((entry) => entry.average_temperature);
 
     const summary: Summary = {
-      morning_average_temperature: getAverageTemperature(tMorning),
-      morning_chance_of_rain: getChanceOfRain(rMorning),
-      afternoon_average_temperature: getAverageTemperature(tAfternoon),
-      afternoon_chance_of_rain: getChanceOfRain(rAfternoon),
+      morning_average_temperature: getAverageTemperature(morningItems),
+      morning_chance_of_rain: getChanceOfRain(morningItems),
+      afternoon_average_temperature: getAverageTemperature(afternoonItems),
+      afternoon_chance_of_rain: getChanceOfRain(afternoonItems),
       high_temperature: Math.max(...tAll),
       low_temperature: Math.min(...tAll),
     };

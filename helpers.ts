@@ -17,15 +17,19 @@ export const averageNumArray = (nums: number[]): MaybeError<number> => {
   return sumNumArray(nums) / nums.length;
 };
 
-export const getAverageTemperature = (items: number[]): number | string => {
-  const maybeValue = averageNumArray(items);
+export const getAverageTemperature = (
+  items: WeatherData[],
+): number | string => {
+  const temps = items.map((e) => e.average_temperature);
+  const maybeValue = averageNumArray(temps);
   return isError(maybeValue)
     ? "Insufficient forecast data"
     : Math.round(maybeValue);
 };
 
-export const getChanceOfRain = (items: number[]): number | string => {
-  const maybeValue = averageNumArray(items);
+export const getChanceOfRain = (items: WeatherData[]): number | string => {
+  const rains = items.map((e) => e.probability_of_rain);
+  const maybeValue = averageNumArray(rains);
   return isError(maybeValue)
     ? "Insufficient forecast data"
     : Number(maybeValue.toFixed(2));
