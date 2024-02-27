@@ -39,21 +39,43 @@ export function summarizeForecast(data: WeatherData[]) {
 
   const summaries: Record<string, Summary> = {};
 
+  const isBetweenHours = (
+    start: number,
+    end: number
+  ): MaybeError<(data: WeatherData) => boolean> => {
+    if (start > end)
+      return Error(`start: ${start} is greater than end" ${end}`);
+
+    if ([start < 0, start > 24, end < 0, end > 24].some((e) => e))
+      return Error("start and end must be between 0 and 24");
+
+    return ({ date_time }) => {
+      const entryTime = parseISO(date_time);
+      const hour = entryTime.getHours();
+      return start <= hour && hour < end;
+    };
+  };
+
+  const morningFilter = isBetweenHours(6, 12);
+  if (isError(morningFilter)) {
+    throw morningFilter;
+  }
   // Process each day
   Object.keys(grpDay).forEach((day) => {
-    const entries = grpDay[day];
-    const tMorning: number[] = [];
+    const items = grpDay[day];
+    const tMorning: number[] = items
+      .filter(morningFilter)
+      .map((item) => item.average_temperature);
     const rMorning: number[] = [];
     const tAfternoon: number[] = [];
     const rAfternoon: number[] = [];
-    const tAll = entries.map((entry) => entry.average_temperature);
+    const tAll = items.map((entry) => entry.average_temperature);
 
-    entries.forEach((entry) => {
+    items.forEach((entry) => {
       const entryTime = parseISO(entry.date_time);
       const hour = entryTime.getHours();
       // Collect morning period entries
       if (6 <= hour && hour < 12) {
-        tMorning.push(entry.average_temperature);
         rMorning.push(entry.probability_of_rain);
       }
       // Collect afternoon period entries
@@ -80,4 +102,3 @@ export function summarizeForecast(data: WeatherData[]) {
 
   return summaries;
 }
-
