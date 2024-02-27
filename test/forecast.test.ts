@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { summarizeForecast } from "../forecast";
 import { weatherData } from "./data";
 
@@ -7,7 +7,7 @@ describe("ForecastTest", function () {
 
   it("should correctly calculate morning average temperature", function () {
     expect(summary["Sunday February 18"]["morning_average_temperature"]).toBe(
-      10,
+      10
     );
   });
 
@@ -17,7 +17,7 @@ describe("ForecastTest", function () {
 
   it("should correctly calculate afternoon average temperature", function () {
     expect(summary["Sunday February 18"]["afternoon_average_temperature"]).toBe(
-      16,
+      16
     );
   });
 
@@ -42,7 +42,7 @@ describe("ForecastTest", function () {
       },
     ]);
     expect(
-      testSummary["Sunday February 18"]["morning_average_temperature"],
+      testSummary["Sunday February 18"]["morning_average_temperature"]
     ).toBe("Insufficient forecast data");
   });
 
@@ -55,7 +55,7 @@ describe("ForecastTest", function () {
       },
     ]);
     expect(
-      testSummary["Sunday February 18"]["afternoon_average_temperature"],
+      testSummary["Sunday February 18"]["afternoon_average_temperature"]
     ).toBe("Insufficient forecast data");
   });
 

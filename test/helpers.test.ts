@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { averageNumArray, isError, sum, sumNumArray } from "../helpers.js";
 
 describe("sum", function () {
