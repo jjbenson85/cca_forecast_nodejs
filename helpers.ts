@@ -59,3 +59,5 @@ export const getDateFromData = ({ date_time }: WeatherData) =>
 
 export const isSameDate = (date: string) => (weatherData: WeatherData) =>
   getDateFromData(weatherData) === date;
+
+export const unique = <T,>(arr: T[]): T[] => Array.from(new Set(arr));

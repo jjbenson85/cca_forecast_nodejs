@@ -1,4 +1,3 @@
-import { parseISO, format } from "date-fns";
 import { WeatherData } from "./test/data";
 import {
   formatData,
@@ -8,6 +7,7 @@ import {
   isBetweenHours,
   isError,
   isSameDate,
+  unique,
 } from "./helpers";
 
 type Summary = {
@@ -19,41 +19,39 @@ type Summary = {
   low_temperature: number;
 };
 
-const createSummary = (data: WeatherData[]) => {
-  const morningFilter = isBetweenHours(6, 12);
-  if (isError(morningFilter)) {
-    throw morningFilter;
-  }
+const morningFilter = isBetweenHours(6, 12);
+if (isError(morningFilter)) {
+  throw morningFilter;
+}
 
-  const afternoonFilter = isBetweenHours(12, 18);
-  if (isError(afternoonFilter)) {
-    throw afternoonFilter;
-  }
-  return (date: string) => {
-    const items = data.filter(isSameDate(date));
-    const morningItems = items.filter(morningFilter);
-    const afternoonItems = items.filter(afternoonFilter);
+const afternoonFilter = isBetweenHours(12, 18);
+if (isError(afternoonFilter)) {
+  throw afternoonFilter;
+}
 
-    const tAll = items.map((entry) => entry.average_temperature);
-    const summary: Summary = {
-      morning_average_temperature: getAverageTemperature(morningItems),
-      morning_chance_of_rain: getChanceOfRain(morningItems),
-      afternoon_average_temperature: getAverageTemperature(afternoonItems),
-      afternoon_chance_of_rain: getChanceOfRain(afternoonItems),
-      high_temperature: Math.max(...tAll),
-      low_temperature: Math.min(...tAll),
-    };
+const createSummary = (items: WeatherData[]) => {
+  const morningItems = items.filter(morningFilter);
+  const afternoonItems = items.filter(afternoonFilter);
 
-    return summary;
+  const tAll = items.map((entry) => entry.average_temperature);
+
+  const summary: Summary = {
+    morning_average_temperature: getAverageTemperature(morningItems),
+    morning_chance_of_rain: getChanceOfRain(morningItems),
+    afternoon_average_temperature: getAverageTemperature(afternoonItems),
+    afternoon_chance_of_rain: getChanceOfRain(afternoonItems),
+    high_temperature: Math.max(...tAll),
+    low_temperature: Math.min(...tAll),
   };
+
+  return summary;
 };
 
 export function summarizeForecast(data: WeatherData[]) {
-  const uniqueDates = [...new Set(data.map(getDateFromData))];
-  const summaryCreator = createSummary(data);
-  const summaryEntries = uniqueDates.map((date) => [
-    formatData(date),
-    summaryCreator(date),
-  ]);
+  const uniqueDates = unique(data.map(getDateFromData));
+  const summaryEntries = uniqueDates.map((date) => {
+    const dateData = data.filter(isSameDate(date));
+    return [formatData(date), createSummary(dateData)];
+  });
   return Object.fromEntries(summaryEntries);
 }

@@ -10,6 +10,7 @@ import {
   isSameDate,
   sum,
   sumNumArray,
+  unique,
 } from "../helpers.js";
 import { WeatherData } from "./data.js";
 
@@ -123,5 +124,11 @@ describe("isSameDate", () => {
   it("should return false if the dates are the different", () => {
     const fn = isSameDate("2021-01-02");
     expect(fn(testWeatherData[0])).toEqual(false);
+  });
+});
+
+describe("unique", () => {
+  it("should return an array with unique values", () => {
+    expect(unique([1, 1, 2, 3, 3, 3])).toEqual([1, 2, 3]);
   });
 });
