@@ -1,7 +1,16 @@
-const { parseISO, format } = require("date-fns");
+import { parseISO, format } from "date-fns";
+import { WeatherData } from "./test/data";
 
-function summarizeForecast(data) {
-  const grpDay = {};
+type Summary = {
+  morning_average_temperature: number | string;
+  morning_chance_of_rain: number | string;
+  afternoon_average_temperature: number | string;
+  afternoon_chance_of_rain: number | string;
+  high_temperature: number;
+  low_temperature: number;
+};
+function summarizeForecast(data: WeatherData[]) {
+  const grpDay: Record<string, WeatherData[]> = {};
 
   // Group entries by day
   data.forEach((e) => {
@@ -13,15 +22,15 @@ function summarizeForecast(data) {
     grpDay[key].push(e);
   });
 
-  const summaries = {};
+  const summaries: Record<string, Summary> = {};
 
   // Process each day
   Object.keys(grpDay).forEach((day) => {
     const entries = grpDay[day];
-    const tMorning = [];
-    const rMorning = [];
-    const tAfternoon = [];
-    const rAfternoon = [];
+    const tMorning: number[] = [];
+    const rMorning: number[] = [];
+    const tAfternoon: number[] = [];
+    const rAfternoon: number[] = [];
     const tAll = entries.map((entry) => entry.average_temperature);
 
     entries.forEach((entry) => {
@@ -39,35 +48,35 @@ function summarizeForecast(data) {
       }
     });
 
-    const getAverageTemperature = (items) => {
-      return items.length === 0
-        ? "Insufficient forecast data"
-        : Math.round(items.reduce((a, b) => a + b, 0) / items.length);
-    };
-
-    const summary = {
+    const summary: Summary = {
       // If no morning data, report insufficient data
-      morning_average_temperature: getAverageTemperature(tMorning),
+      morning_average_temperature:
+        tMorning.length === 0
+          ? "Insufficient forecast data"
+          : Math.round(tMorning.reduce((a, b) => a + b, 0) / tMorning.length),
 
       morning_chance_of_rain:
         rMorning.length === 0
           ? "Insufficient forecast data"
           : Number(
-            (rMorning.reduce((a, b) => a + b, 0) / rMorning.length).toFixed(
-              2,
+              (rMorning.reduce((a, b) => a + b, 0) / rMorning.length).toFixed(2)
             ),
-          ),
       // If no afternoon data, report insufficient data
-      afternoon_average_temperature: getAverageTemperature(tAfternoon)
+      afternoon_average_temperature:
+        tAfternoon.length === 0
+          ? "Insufficient forecast data"
+          : Math.round(
+              tAfternoon.reduce((a, b) => a + b, 0) / tAfternoon.length
+            ),
 
       afternoon_chance_of_rain:
         rAfternoon.length === 0
           ? "Insufficient forecast data"
           : Number(
-            (
-              rAfternoon.reduce((a, b) => a + b, 0) / rAfternoon.length
-            ).toFixed(2),
-          ),
+              (
+                rAfternoon.reduce((a, b) => a + b, 0) / rAfternoon.length
+              ).toFixed(2)
+            ),
       high_temperature: Math.max(...tAll),
       low_temperature: Math.min(...tAll),
     };
