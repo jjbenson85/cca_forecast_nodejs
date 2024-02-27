@@ -41,7 +41,7 @@ export function summarizeForecast(data: WeatherData[]) {
 
   const isBetweenHours = (
     start: number,
-    end: number
+    end: number,
   ): MaybeError<(data: WeatherData) => boolean> => {
     if (start > end)
       return Error(`start: ${start} is greater than end" ${end}`);
@@ -60,30 +60,32 @@ export function summarizeForecast(data: WeatherData[]) {
   if (isError(morningFilter)) {
     throw morningFilter;
   }
+
+  const afternoonFilter = isBetweenHours(12, 18);
+  if (isError(afternoonFilter)) {
+    throw afternoonFilter;
+  }
+
   // Process each day
   Object.keys(grpDay).forEach((day) => {
     const items = grpDay[day];
-    const tMorning: number[] = items
-      .filter(morningFilter)
-      .map((item) => item.average_temperature);
-    const rMorning: number[] = [];
-    const tAfternoon: number[] = [];
-    const rAfternoon: number[] = [];
-    const tAll = items.map((entry) => entry.average_temperature);
 
-    items.forEach((entry) => {
-      const entryTime = parseISO(entry.date_time);
-      const hour = entryTime.getHours();
-      // Collect morning period entries
-      if (6 <= hour && hour < 12) {
-        rMorning.push(entry.probability_of_rain);
-      }
-      // Collect afternoon period entries
-      else if (12 <= hour && hour < 18) {
-        tAfternoon.push(entry.average_temperature);
-        rAfternoon.push(entry.probability_of_rain);
-      }
-    });
+    const morningItems = items.filter(morningFilter);
+    const afternoonItems = items.filter(afternoonFilter);
+
+    const tMorning: number[] = morningItems.map(
+      (item) => item.average_temperature,
+    );
+    const rMorning: number[] = morningItems.map(
+      (item) => item.probability_of_rain,
+    );
+    const tAfternoon: number[] = afternoonItems.map(
+      (item) => item.average_temperature,
+    );
+    const rAfternoon: number[] = afternoonItems.map(
+      (item) => item.probability_of_rain,
+    );
+    const tAll = items.map((entry) => entry.average_temperature);
 
     const summary: Summary = {
       morning_average_temperature: getAverageTemperature(tMorning),
