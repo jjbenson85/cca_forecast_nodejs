@@ -2,7 +2,8 @@
   "name": "forecast_js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "exports": "index.js",
+  "type": "module",
   "scripts": {
     "test": "mocha"
   },
@@ -12,5 +13,12 @@
   "dependencies": {
     "date-fns": "^3.3.1",
     "mocha": "^10.3.0"
+  },
+  "module": "index.ts",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   }
 }
