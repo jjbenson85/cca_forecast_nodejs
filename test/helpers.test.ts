@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   averageNumArray,
+  formatData,
   getAverageTemperature,
   getChanceOfRain,
+  getDateFromData,
   isBetweenHours,
   isError,
+  isSameDate,
   sum,
   sumNumArray,
 } from "../helpers.js";
@@ -97,5 +100,28 @@ describe("isBetweenHours", () => {
     expect(isBetweenHours(-1, 2)).toEqual(
       Error("start and end must be between 0 and 24"),
     );
+  });
+});
+
+describe("formatData", () => {
+  it("should format the date", () => {
+    expect(formatData("2021-01-01")).toEqual("Friday January 1");
+  });
+});
+
+describe("getDateFromData", () => {
+  it("should return the date from the data", () => {
+    expect(getDateFromData(testWeatherData[0])).toEqual("2021-01-01");
+  });
+});
+
+describe("isSameDate", () => {
+  it("should return true if the dates are the same", () => {
+    const fn = isSameDate("2021-01-01");
+    expect(fn(testWeatherData[0])).toEqual(true);
+  });
+  it("should return false if the dates are the different", () => {
+    const fn = isSameDate("2021-01-02");
+    expect(fn(testWeatherData[0])).toEqual(false);
   });
 });

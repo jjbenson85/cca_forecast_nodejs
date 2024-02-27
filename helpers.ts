@@ -1,4 +1,4 @@
-import { parseISO } from "date-fns";
+import { parseISO, format } from "date-fns";
 import { WeatherData } from "./test/data";
 
 export const isError = <T,>(err: T | Error): err is Error =>
@@ -50,3 +50,12 @@ export const isBetweenHours = (
     return start <= hour && hour < end;
   };
 };
+
+export const formatData = (day: string) =>
+  format(parseISO(day), "EEEE MMMM dd").replace(" 0", " ");
+
+export const getDateFromData = ({ date_time }: WeatherData) =>
+  date_time.split("T")[0];
+
+export const isSameDate = (date: string) => (weatherData: WeatherData) =>
+  getDateFromData(weatherData) === date;
